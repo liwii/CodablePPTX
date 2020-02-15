@@ -124,7 +124,7 @@ def main(filename, output):
     for layout in layouts:
         slide = prs.slides.add_slide(blank_slide_layout)
         apply_layout(slide, layout)
-    prs.save('test.pptx')
+    prs.save(output)
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
