@@ -112,7 +112,7 @@ def apply_layout(slide, layout):
     if 'text' in layout:
         add_text(slide, layout['text'])
 
-def main(filename):
+def main(filename, output):
     f = open(filename, 'r')
     slides_dict = yaml.load(f, Loader=yaml.BaseLoader)
     f.close()
@@ -127,4 +127,4 @@ def main(filename):
     prs.save('test.pptx')
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
