@@ -6,6 +6,12 @@
 - Pillow
 - python-pptx
 
+## Install Dependencies
+
+```sh
+pip install -r requirements.txt
+```
+
 ## Usage
 
 ```sh
