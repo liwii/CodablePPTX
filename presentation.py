@@ -3,127 +3,155 @@ import sys
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR
+from pptx.dml.color import RGBColor
 from PIL import Image
 
 SLIDE_WIDTH = Inches(13.33)
 SLIDE_HEIGHT = Inches(7.5)
-TOP_MARGIN = Inches(0.3)
-SIDE_MARGIN = Inches(0.6)
-TITLE_HEIGHT = Inches(1.5)
 
-def add_center_title(slide, title):
-    height = TITLE_HEIGHT
-    left = SIDE_MARGIN
-    width = SLIDE_WIDTH - 2 * left
-    font_size = Pt(60)
-    top = (SLIDE_HEIGHT - height) / 2
-    tx_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = tx_box.text_frame
-    tf.clear()
-    p = tf.add_paragraph()
-    p.font.size = font_size
-    p.alignment = PP_ALIGN.CENTER
-    p.text = title
-
-def add_top_title(slide, title):
-    left = SIDE_MARGIN
-    height = TITLE_HEIGHT
-    width = SLIDE_WIDTH - 2 * left
-    font_size = Pt(40)
-    top = TOP_MARGIN
-    tx_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = tx_box.text_frame
-    tf.clear()
-    p = tf.add_paragraph()
-    p.font.size = font_size
-    p.alignment = PP_ALIGN.LEFT
-    p.text = title
-
-def add_side_title(slide, title):
-    left = SIDE_MARGIN
-    height = TITLE_HEIGHT
-    width = SLIDE_WIDTH / 2 - left - SIDE_MARGIN
-    font_size = Pt(40)
-    top = TOP_MARGIN
-    tx_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = tx_box.text_frame
-    tf.clear()
-    p = tf.add_paragraph()
-    p.font.size = font_size
-    p.alignment = PP_ALIGN.LEFT
-    p.text = title
-
-def add_img(slide, img_file):
-    img = Image.open(img_file)
-    w, h = img.size
-    ratio = h / w
-    max_width = SLIDE_WIDTH - SIDE_MARGIN * 2
-    max_height = SLIDE_HEIGHT - TITLE_HEIGHT - TOP_MARGIN * 2
-    if max_height / max_width > ratio:
-        width = max_width
-        height = max_width * ratio
+def add_image(base, content, theme):
+    default_config = {
+        'aspect': 'fill'
+    }
+    if isinstance(content, dict):
+        content_config = content
     else:
-        height = max_height
-        width = height / ratio
-    left = (SLIDE_WIDTH - width) / 2
-    top = SLIDE_HEIGHT - height - TOP_MARGIN
-    slide.shapes.add_picture(img_file, left, top, width=width)
-
-def add_side_img(slide, img_file):
-    img = Image.open(img_file)
-    w, h = img.size
-    ratio = h / w
-    max_height = SLIDE_HEIGHT  - TOP_MARGIN * 2
-    max_width = SLIDE_WIDTH / 2 - SIDE_MARGIN
-    if max_height / max_width > ratio:
-        width = max_width
-        height = max_width * ratio
+        content_config = { 'file': content }
+    config = { **default_config, **theme, **content_config }
+    img = Image.open(config['file'])
+    l, t, w, h = frame_to_position(config['frame'])
+    frame_ratio = h / w
+    img_w, img_h = img.size
+    img_ratio = img_h / img_w
+    if config['aspect'] == 'fill':
+        left = l
+        top = t
+        height = h
+        width = w
+        if frame_ratio > img_ratio:
+            crop_horizontal = 0.5 - (img_ratio / frame_ratio) / 2
+            crop_vertical = 0
+        else:
+            crop_horizontal = 0
+            crop_vertical = 0.5 - (frame_ratio / img_ratio) / 2
+    elif config['aspect'] == 'fit':
+        crop_horizontal = 0
+        crop_vertical = 0
+        if frame_ratio > img_ratio:
+            left = l
+            width = w
+            height  = width * img_ratio
+            top = t + (h - height) / 2
+        else:
+            top = t
+            height = h
+            width = height / img_ratio
+            left = l + (w - width) / 2
     else:
-        height = max_height
-        width = height / ratio
-    left = SLIDE_WIDTH - SIDE_MARGIN - width
-    top = (SLIDE_HEIGHT - height) / 2
-    slide.shapes.add_picture(img_file, left, top, width=width)
+        raise ValueError(f'Invalid aspect value: {config["aspect"]}')
+    picture = base.shapes.add_picture(config['file'], left, top, width=width, height=height)
+    picture.crop_right = crop_horizontal
+    picture.crop_left = crop_horizontal
+    picture.crop_top = crop_vertical
+    picture.crop_bottom = crop_vertical
 
-def add_text(slide, text):
-    font_size = Pt(24)
-    height = SLIDE_HEIGHT - TOP_MARGIN * 3 - TITLE_HEIGHT
-    width = SLIDE_WIDTH - SIDE_MARGIN * 2
-    top = TOP_MARGIN * 2 + TITLE_HEIGHT
-    left = SIDE_MARGIN
-    tx_box = slide.shapes.add_textbox(left, top, width, height)
+def frame_to_position(frame):
+    xl, xh = [float(f) for f in frame['x']] 
+    yl, yh = [float(f) for f in frame['y']] 
+
+    left = xl * SLIDE_WIDTH / 100
+    width = xh * SLIDE_WIDTH / 100 - left
+    top = yl * SLIDE_HEIGHT / 100
+    height = yh * SLIDE_HEIGHT/ 100 - top
+    return left, top, width, height
+
+def add_text(base, content, theme):
+    default_config = {
+        'value' : '',
+        'font' : 'Arial',
+        'fontsize' : 26,
+        'fontcolor': "#4D4D4D",
+        'valign': 'top',
+        'halign': 'left',
+    }
+    if isinstance(content, dict):
+        content_config = content
+    else:
+        content_config = { 'value': content }
+    config = { **default_config, **theme, **content_config }
+    l, t, w, h = frame_to_position(config['frame'])
+    tx_box = base.shapes.add_textbox(l, t, w, h)
     tf = tx_box.text_frame
     tf.clear()
-    p = tf.add_paragraph()
-    p.font.size = font_size
-    p.text = text
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = config['value']
+    p.font.name = config['font']
+    p.font.size = Pt(int(config['fontsize']))
+    p.font.color.rgb = RGBColor.from_string(config['fontcolor'][1:])
 
-def apply_layout(slide, layout):
-    if 'centerTitle' in layout:
-        add_center_title(slide, layout['centerTitle'])
-    if 'topTitle' in layout:
-        add_top_title(slide, layout['topTitle'])
-    if 'sideTitle' in layout:
-        add_side_title(slide, layout['sideTitle'])
-    if 'img' in layout:
-        add_img(slide, layout['img'])
-    if 'sideImg' in layout:
-        add_side_img(slide, layout['sideImg'])
-    if 'text' in layout:
-        add_text(slide, layout['text'])
+    if config['valign'] == 'top':
+        tf.vertical_anchor = MSO_ANCHOR.TOP 
+    elif config['valign'] == 'middle':
+        tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    elif config['valign'] == 'bottom':
+        tf.vertical_anchor = MSO_ANCHOR.BOTTOM
+    else:
+        raise ValueError(f'Invalid valign value: {config["valign"]}')
+
+    if config['halign'] == 'left':
+        p.alignment = PP_ALIGN.LEFT
+    elif config['halign'] == 'center':
+        p.alignment = PP_ALIGN.CENTER
+    elif config['halign'] == 'right':
+        p.alignment = PP_ALIGN.RIGHT
+    else:
+        raise ValueError(f'Invalid halign value: {config["halign"]}')
+
+def apply_design(base, content, theme):
+    if 'title' in content:
+        for i, title in enumerate(content['title']):
+            add_text(base, title, theme['title'][i])
+
+    if 'subtitle' in content:
+        for i, subtitle in enumerate(content['subtitle']):
+            add_text(base, subtitle, theme['subtitle'][i])
+
+    if 'text' in content:
+        for i, text in enumerate(content['text']):
+            add_text(base, text, theme['text'][i])
+
+    if 'image' in content:
+        for i, image in enumerate(content['image']):
+            add_image(base, image, theme['image'][i])
+
+def draw_theme(theme, layouts):
+    for layout in layouts:
+        if layout['id'] == theme:
+            return layout
+    raise ValueError(f'Theme doesn\'t exist: {theme}')
 
 def main(filename, output):
     f = open(filename, 'r')
-    slides_dict = yaml.load(f, Loader=yaml.BaseLoader)
+    presentation_dict = yaml.load(f, Loader=yaml.BaseLoader)
     f.close()
-    layouts = slides_dict['slides']
+    slides = presentation_dict['slides']
+    layouts = []
+    for layout_file in presentation_dict['import']:
+        layout_f = open(layout_file, 'r')
+        layout_dict = yaml.load(layout_f,  Loader=yaml.BaseLoader)
+        layout_f.close()
+        layouts = layout_dict['layouts'] +  layouts
     prs = Presentation()
     prs.slide_width = SLIDE_WIDTH
     prs.slide_height = SLIDE_HEIGHT
     blank_slide_layout = prs.slide_layouts[6]
-    for layout in layouts:
-        slide = prs.slides.add_slide(blank_slide_layout)
-        apply_layout(slide, layout)
+    for slide in slides:
+        blank_slide = prs.slides.add_slide(blank_slide_layout)
+        if slide['theme']:
+            theme = draw_theme(slide['theme'], layouts)
+        apply_design(blank_slide, slide, theme)
     prs.save(output)
 
 if __name__ == "__main__":
