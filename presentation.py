@@ -2,13 +2,29 @@ import yaml
 import sys
 from pptx import Presentation
 from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN
-from pptx.enum.text import MSO_ANCHOR
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 from PIL import Image
 
 SLIDE_WIDTH = Inches(13.33)
 SLIDE_HEIGHT = Inches(7.5)
+
+def add_shape(base, shape_config):
+    if shape_config['type'] == 'rectangle':
+        shape_type = MSO_SHAPE.RECTANGLE
+    else:
+        raise ValueError(f'Invalide shape type value: {shape_config["type"]}')
+    l, t, w, h = frame_to_position(shape_config['frame'])
+    shapes = base.shapes
+    shape = shapes.add_shape(shape_type, l, t, w, h)
+    fill = shape.fill
+    fill.solid()
+    fill.fore_color.rgb = RGBColor.from_string(shape_config['color'][1:])
+    shape.line.fill.background()
+    shape.shadow.inherit = False
+    shape.shadow.visible = False
+
 
 def add_image(base, content, theme):
     default_config = {
@@ -125,6 +141,10 @@ def apply_design(base, content, theme):
     if 'image' in content:
         for i, image in enumerate(content['image']):
             add_image(base, image, theme['image'][i])
+
+    if 'shape' in theme:
+        for shape in theme['shape']:
+            add_shape(base, shape)
 
 def draw_theme(theme, layouts):
     for layout in layouts:
