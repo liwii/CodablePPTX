@@ -125,32 +125,74 @@ def add_text(base, content, theme):
     else:
         raise ValueError(f'Invalid halign value: {config["halign"]}')
 
+def push_filled_backword(theme):
+    for k in theme:
+        if isinstance(theme[k], str):
+            continue
+        filled_in, not_filled_in = [], []
+        for box in theme[k]:
+            if ('value' in box) or ('file' in box):
+                filled_in.append(box)
+            else:
+                not_filled_in.append(box)
+        theme[k] = not_filled_in + filled_in
+
+def add_empty_config(content, theme, key):
+    if key not in content:
+        content[key] = []
+    if key not in theme:
+        theme[key] = []
+    diff = len(content[key]) - len(theme[key])
+    if  diff > 0:
+        longer, shorter = content[key], theme[key]
+    else:
+        longer, shorter = theme[key], content[key]
+    for i in range(abs(diff)):
+        shorter.append({})
+
 def apply_design(base, content, theme):
-    if 'title' in content:
-        for i, title in enumerate(content['title']):
-            add_text(base, title, theme['title'][i])
+    push_filled_backword(theme)
+    for key in ['title', 'subtitle', 'text', 'image']:
+        add_empty_config(content, theme, key)
 
-    if 'subtitle' in content:
-        for i, subtitle in enumerate(content['subtitle']):
-            add_text(base, subtitle, theme['subtitle'][i])
+    for i, title in enumerate(content['title']):
+        add_text(base, title, theme['title'][i])
 
-    if 'text' in content:
-        for i, text in enumerate(content['text']):
-            add_text(base, text, theme['text'][i])
+    for i, subtitle in enumerate(content['subtitle']):
+        add_text(base, subtitle, theme['subtitle'][i])
 
-    if 'image' in content:
-        for i, image in enumerate(content['image']):
-            add_image(base, image, theme['image'][i])
+    for i, text in enumerate(content['text']):
+        add_text(base, text, theme['text'][i])
+
+    for i, image in enumerate(content['image']):
+        add_image(base, image, theme['image'][i])
 
     if 'shape' in theme:
         for shape in theme['shape']:
             add_shape(base, shape)
+
+def apply_master(layout, master):
+    for master_content in master:
+        if master_content == 'id':
+            continue
+        if master_content in layout:
+            layout[master_content] = master[master_content] + layout[master_content]
+        else:
+            layout[master_content] = master[master_content]
+    return layout
+            
 
 def draw_theme(theme, layouts):
     for layout in layouts:
         if layout['id'] == theme:
             return layout
     raise ValueError(f'Theme doesn\'t exist: {theme}')
+
+def draw_master(master_title, masters):
+    for master in masters:
+        if master['id'] == master_title:
+            return master
+    raise ValueError(f'Master doesn\'t exist: {master_title}')
 
 def main(filename, output):
     f = open(filename, 'r')
@@ -162,7 +204,14 @@ def main(filename, output):
         layout_f = open(layout_file, 'r')
         layout_dict = yaml.load(layout_f,  Loader=yaml.BaseLoader)
         layout_f.close()
-        layouts = layout_dict['layouts'] +  layouts
+        layouts_template = layout_dict['layouts']
+        if 'masters' in layout_dict:
+            masters = layout_dict['masters']
+            for i, layout in enumerate(layouts_template):
+                if 'master' in layout:
+                    master = draw_master(layout['master'], masters)
+                    layouts_template[i] = apply_master(layout, master)
+        layouts = layouts + layouts_template
     prs = Presentation()
     prs.slide_width = SLIDE_WIDTH
     prs.slide_height = SLIDE_HEIGHT
