@@ -6,6 +6,7 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from PIL import Image
+from copy import deepcopy
 
 SLIDE_WIDTH = Inches(13.33)
 SLIDE_HEIGHT = Inches(7.5)
@@ -150,10 +151,33 @@ def add_empty_config(content, theme, key):
     for i in range(abs(diff)):
         shorter.append({})
 
+def nth_block(segment, margin, n, num_blocks):
+    seg_begin, seg_end = int(segment[0]), int(segment[1])
+    segment_len = seg_end - seg_begin
+    block_len = (segment_len - margin * (num_blocks - 1)) / num_blocks
+    new_seg_begin = n * (block_len + margin) + seg_begin
+    return [new_seg_begin, new_seg_begin + block_len]
+
+def fill_vstack_content(stack_contents, stack_frame, content, theme):
+    for key in ['title', 'subtitle', 'text', 'image']:
+        if key not in stack_contents:
+            continue
+        blocks = len(stack_contents[key])
+        for i, stack_content in enumerate(stack_contents[key]):
+            frame = deepcopy(stack_frame[key])
+            frame['frame'] = {}
+            frame['frame']['x'] = stack_frame['frame']['x']
+            frame['frame']['y'] = nth_block(stack_frame['frame']['y'], int(stack_frame['margin']), i, blocks)
+            content[key].append(stack_content)
+            theme[key].append(frame)
+
 def apply_design(base, content, theme, pageidx):
     push_filled_backword(theme)
-    for key in ['title', 'subtitle', 'text', 'image']:
+    for key in ['title', 'subtitle', 'text', 'image', 'vstack']:
         add_empty_config(content, theme, key)
+
+    for stack_contents, stack_frame in zip(content['vstack'], theme['vstack']):
+        fill_vstack_content(stack_contents, stack_frame, content, theme)
 
     for i, title in enumerate(content['title']):
         add_text(base, title, theme['title'][i])
