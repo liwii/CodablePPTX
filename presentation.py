@@ -127,7 +127,7 @@ def add_text(base, content, theme):
 
 def push_filled_backword(theme):
     for k in theme:
-        if isinstance(theme[k], str):
+        if isinstance(theme[k], str) or isinstance(theme[k], dict):
             continue
         filled_in, not_filled_in = [], []
         for box in theme[k]:
@@ -150,7 +150,7 @@ def add_empty_config(content, theme, key):
     for i in range(abs(diff)):
         shorter.append({})
 
-def apply_design(base, content, theme):
+def apply_design(base, content, theme, pageidx):
     push_filled_backword(theme)
     for key in ['title', 'subtitle', 'text', 'image']:
         add_empty_config(content, theme, key)
@@ -166,6 +166,10 @@ def apply_design(base, content, theme):
 
     for i, image in enumerate(content['image']):
         add_image(base, image, theme['image'][i])
+
+    if 'pagenum' in theme:
+        theme['pagenum']['value'] = str(pageidx + 1)
+        add_text(base, {}, theme['pagenum'])
 
     if 'shape' in theme:
         for shape in theme['shape']:
@@ -216,11 +220,11 @@ def main(filename, output):
     prs.slide_width = SLIDE_WIDTH
     prs.slide_height = SLIDE_HEIGHT
     blank_slide_layout = prs.slide_layouts[6]
-    for slide in slides:
+    for i, slide in enumerate(slides):
         blank_slide = prs.slides.add_slide(blank_slide_layout)
         if slide['theme']:
             theme = draw_theme(slide['theme'], layouts)
-        apply_design(blank_slide, slide, theme)
+        apply_design(blank_slide, slide, theme, i)
     prs.save(output)
 
 if __name__ == "__main__":
