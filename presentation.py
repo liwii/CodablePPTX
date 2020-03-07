@@ -158,8 +158,26 @@ def nth_block(segment, margin, n, num_blocks):
     new_seg_begin = n * (block_len + margin) + seg_begin
     return [new_seg_begin, new_seg_begin + block_len]
 
+def fill_hstack_content(stack_contents, stack_frame, content, theme):
+    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
+        if key not in stack_contents:
+            continue
+        blocks = len(stack_contents[key])
+        for i, stack_content in enumerate(stack_contents[key]):
+            frame = deepcopy(stack_frame[key])
+            frame['frame'] = {}
+            frame['frame']['y'] = stack_frame['frame']['y']
+            frame['frame']['x'] = nth_block(stack_frame['frame']['x'], int(stack_frame['margin']), i, blocks)
+            if key == 'vstack':
+                fill_vstack_content(stack_content, frame, content, theme)
+            elif key == 'hstack':
+                fill_hstack_content(stack_content, frame, content, theme)
+            else:
+                content[key].append(stack_content)
+                theme[key].append(frame)
+
 def fill_vstack_content(stack_contents, stack_frame, content, theme):
-    for key in ['title', 'subtitle', 'text', 'image']:
+    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
         if key not in stack_contents:
             continue
         blocks = len(stack_contents[key])
@@ -168,15 +186,23 @@ def fill_vstack_content(stack_contents, stack_frame, content, theme):
             frame['frame'] = {}
             frame['frame']['x'] = stack_frame['frame']['x']
             frame['frame']['y'] = nth_block(stack_frame['frame']['y'], int(stack_frame['margin']), i, blocks)
-            content[key].append(stack_content)
-            theme[key].append(frame)
+            if key == 'vstack':
+                fill_vstack_content(stack_content, frame, content, theme)
+            elif key == 'hstack':
+                fill_hstack_content(stack_content, frame, content, theme)
+            else:
+                content[key].append(stack_content)
+                theme[key].append(frame)
 
 def apply_design(base, content, theme, pageidx):
     push_filled_backword(theme)
-    for key in ['title', 'subtitle', 'text', 'image', 'vstack']:
+    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
         add_empty_config(content, theme, key)
 
     for stack_contents, stack_frame in zip(content['vstack'], theme['vstack']):
+        fill_vstack_content(stack_contents, stack_frame, content, theme)
+
+    for stack_contents, stack_frame in zip(content['hstack'], theme['hstack']):
         fill_vstack_content(stack_contents, stack_frame, content, theme)
 
     for i, title in enumerate(content['title']):
@@ -213,7 +239,7 @@ def apply_master(layout, master):
 def draw_theme(theme, layouts):
     for layout in layouts:
         if layout['id'] == theme:
-            return layout
+            return deepcopy(layout)
     raise ValueError(f'Theme doesn\'t exist: {theme}')
 
 def draw_master(master_title, masters):
