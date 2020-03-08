@@ -4,3 +4,7 @@
 *.pptx
 *.yml
 *.yaml
+.DS_STORE
+*.md5
+*.pdf
+node_modules

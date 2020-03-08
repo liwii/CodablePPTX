@@ -1,0 +1,26 @@
+{
+  "name": "codable-pptx",
+  "version": "0.1.0",
+  "description": "Text file specification of pptx files",
+  "main": "index.js",
+  "scripts": {
+    "server": "node ./server/app.js",
+    "build": "browserify ./server/src/main.js > ./server/dist/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liwii/CodablePPTX.git"
+  },
+  "author": "Koki Ryu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/liwii/CodablePPTX/issues"
+  },
+  "homepage": "https://github.com/liwii/CodablePPTX#readme",
+  "devDependencies": {
+    "pdfjs-dist": "^2.2.228"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
