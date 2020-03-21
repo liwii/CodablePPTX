@@ -221,8 +221,11 @@ def fill_zip(content, theme, key):
 
 def apply_design(base, content, theme, pageidx):
     ignore_filled(content, theme)
-    for key in ['title', 'subtitle', 'text', 'image', 'shape', 'vstack', 'hstack']:
+    for key in ['title', 'subtitle', 'text', 'image', 'shape', 'pagenum', 'vstack', 'hstack']:
         add_empty_config(content, theme, key)
+
+    for shape, shape_theme in fill_zip(content, theme, 'shape'):
+        add_shape(base, shape, shape_theme)
 
     for stack_contents, stack_frame in zip(content['vstack'], theme['vstack']):
         fill_vstack_content(stack_contents, stack_frame, content, theme)
@@ -242,12 +245,9 @@ def apply_design(base, content, theme, pageidx):
     for image, image_theme in fill_zip(content, theme, 'image'):
         add_image(base, image, image_theme)
 
-    if 'pagenum' in theme:
-        theme['pagenum']['value'] = str(pageidx + 1)
-        add_text(base, {}, theme['pagenum'])
-
-    for shape, shape_theme in fill_zip(content, theme, 'shape'):
-        add_shape(base, shape, shape_theme)
+    for pagenum, pagenum_theme in fill_zip(content, theme, 'pagenum'):
+        pagenum['value'] = str(pageidx + 1)
+        add_text(base, pagenum, pagenum_theme)
 
 def apply_master(layout, master):
     for master_content in master:
