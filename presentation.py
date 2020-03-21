@@ -11,6 +11,13 @@ from copy import deepcopy
 SLIDE_WIDTH = Inches(13.33)
 SLIDE_HEIGHT = Inches(7.5)
 
+def get_theme(theme, key, index):
+    if key not in theme:
+        return {}
+    if len(theme[key]) <= index:
+        return {}
+    return theme[key][index]
+
 def add_shape(base, shape_config):
     if shape_config['type'] == 'rectangle':
         shape_type = MSO_SHAPE.RECTANGLE
@@ -84,6 +91,7 @@ def frame_to_position(frame):
     return left, top, width, height
 
 def add_text(base, content, theme):
+    #breakpoint()
     default_config = {
         'value' : '',
         'font' : 'Arial',
@@ -206,16 +214,17 @@ def apply_design(base, content, theme, pageidx):
         fill_vstack_content(stack_contents, stack_frame, content, theme)
 
     for i, title in enumerate(content['title']):
-        add_text(base, title, theme['title'][i])
+        #breakpoint()
+        add_text(base, title, get_theme(theme, 'title', i))
 
     for i, subtitle in enumerate(content['subtitle']):
-        add_text(base, subtitle, theme['subtitle'][i])
+        add_text(base, subtitle, get_theme(theme, 'subtitle', i))
 
     for i, text in enumerate(content['text']):
-        add_text(base, text, theme['text'][i])
+        add_text(base, text, get_theme(theme, 'text', i))
 
     for i, image in enumerate(content['image']):
-        add_image(base, image, theme['image'][i])
+        add_image(base, image, get_theme(theme, 'image', i))
 
     if 'pagenum' in theme:
         theme['pagenum']['value'] = str(pageidx + 1)
@@ -272,8 +281,10 @@ def main(filename, output):
     blank_slide_layout = prs.slide_layouts[6]
     for i, slide in enumerate(slides):
         blank_slide = prs.slides.add_slide(blank_slide_layout)
-        if slide['theme']:
+        if 'theme' in slide:
             theme = draw_theme(slide['theme'], layouts)
+        else:
+            theme = {}
         apply_design(blank_slide, slide, theme, i)
     prs.save(output)
 
