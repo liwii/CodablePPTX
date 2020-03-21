@@ -140,13 +140,13 @@ def add_text(base, content, theme):
     else:
         raise ValueError(f'Invalid halign value: {config["halign"]}')
 
-def ignore_filled(content, theme):
+def ignore_fixed(content, theme):
     for k in theme:
         if isinstance(theme[k], str) or isinstance(theme[k], dict):
             continue
         filled_in, not_filled_in = [], []
         for box in theme[k]:
-            if ('value' in box) or ('file' in box):
+            if ('fixed' in box) and (box['fixed'] != 'false'):
                 filled_in.append(box)
             else:
                 not_filled_in.append(box)
@@ -209,6 +209,7 @@ def fill_vstack_content(stack_contents, stack_frame, content, theme):
             else:
                 content[key].append(stack_content)
                 theme[key].append(frame)
+
 def fill_zip(content, theme, key):
     elements_content = content[key]
     elements_theme = theme[key]
@@ -220,7 +221,7 @@ def fill_zip(content, theme, key):
 
 
 def apply_design(base, content, theme, pageidx):
-    ignore_filled(content, theme)
+    ignore_fixed(content, theme)
     for key in ['title', 'subtitle', 'text', 'image', 'shape', 'pagenum', 'vstack', 'hstack']:
         add_empty_config(content, theme, key)
 
