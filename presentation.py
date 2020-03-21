@@ -18,17 +18,23 @@ def get_theme(theme, key, index):
         return {}
     return theme[key][index]
 
-def add_shape(base, shape_config):
-    if shape_config['type'] == 'rectangle':
+def add_shape(base, content, theme):
+    default_config = {
+        'type': 'rectangle'
+    }
+    config = { **theme, **content}
+    if config['type'] == 'rectangle':
         shape_type = MSO_SHAPE.RECTANGLE
+    elif config['type'] == 'rounded_rectangle':
+         shape_type = MSO_SHAPE.ROUNDED_RECTANGLE
     else:
-        raise ValueError(f'Invalide shape type value: {shape_config["type"]}')
-    l, t, w, h = frame_to_position(shape_config['frame'])
+        raise ValueError(f'Invalide shape type value: {config["type"]}')
+    l, t, w, h = frame_to_position(config['frame'])
     shapes = base.shapes
     shape = shapes.add_shape(shape_type, l, t, w, h)
     fill = shape.fill
     fill.solid()
-    fill.fore_color.rgb = RGBColor.from_string(shape_config['color'][1:])
+    fill.fore_color.rgb = RGBColor.from_string(config['color'][1:])
     shape.line.fill.background()
     shape.shadow.inherit = False
     shape.shadow.visible = False
@@ -215,7 +221,7 @@ def fill_zip(content, theme, key):
 
 def apply_design(base, content, theme, pageidx):
     ignore_filled(content, theme)
-    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
+    for key in ['title', 'subtitle', 'text', 'image', 'shape', 'vstack', 'hstack']:
         add_empty_config(content, theme, key)
 
     for stack_contents, stack_frame in zip(content['vstack'], theme['vstack']):
@@ -225,7 +231,6 @@ def apply_design(base, content, theme, pageidx):
         fill_vstack_content(stack_contents, stack_frame, content, theme)
 
     for title, title_theme in fill_zip(content, theme, 'title'):
-        #breakpoint()
         add_text(base, title, title_theme)
 
     for subtitle, subtitle_theme in fill_zip(content, theme, 'subtitle'):
@@ -237,22 +242,12 @@ def apply_design(base, content, theme, pageidx):
     for image, image_theme in fill_zip(content, theme, 'image'):
         add_image(base, image, image_theme)
 
-    #for i, subtitle in enumerate(content['subtitle']):
-    #    add_text(base, subtitle, get_theme(theme, 'subtitle', i))
-
-    #for i, text in enumerate(content['text']):
-    #    add_text(base, text, get_theme(theme, 'text', i))
-
-    #for i, image in enumerate(content['image']):
-    #    add_image(base, image, get_theme(theme, 'image', i))
-
     if 'pagenum' in theme:
         theme['pagenum']['value'] = str(pageidx + 1)
         add_text(base, {}, theme['pagenum'])
 
-    if 'shape' in theme:
-        for shape in theme['shape']:
-            add_shape(base, shape)
+    for shape, shape_theme in fill_zip(content, theme, 'shape'):
+        add_shape(base, shape, shape_theme)
 
 def apply_master(layout, master):
     for master_content in master:
