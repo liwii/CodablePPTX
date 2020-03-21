@@ -203,6 +203,15 @@ def fill_vstack_content(stack_contents, stack_frame, content, theme):
             else:
                 content[key].append(stack_content)
                 theme[key].append(frame)
+def fill_zip(content, theme, key):
+    elements_content = content[key]
+    elements_theme = theme[key]
+    if len(elements_content) > len(elements_theme):
+        elements_theme += [{}] * len(elements_content)
+    else:
+        elements_content+= [{}] * len(elements_theme)
+    return zip(elements_content, elements_theme)
+
 
 def apply_design(base, content, theme, pageidx):
     ignore_filled(content, theme)
@@ -215,18 +224,27 @@ def apply_design(base, content, theme, pageidx):
     for stack_contents, stack_frame in zip(content['hstack'], theme['hstack']):
         fill_vstack_content(stack_contents, stack_frame, content, theme)
 
-    for i, title in enumerate(content['title']):
+    for title, title_theme in fill_zip(content, theme, 'title'):
         #breakpoint()
-        add_text(base, title, get_theme(theme, 'title', i))
+        add_text(base, title, title_theme)
 
-    for i, subtitle in enumerate(content['subtitle']):
-        add_text(base, subtitle, get_theme(theme, 'subtitle', i))
+    for subtitle, subtitle_theme in fill_zip(content, theme, 'subtitle'):
+        add_text(base, subtitle, subtitle_theme)
 
-    for i, text in enumerate(content['text']):
-        add_text(base, text, get_theme(theme, 'text', i))
+    for text, text_theme in fill_zip(content, theme, 'text'):
+        add_text(base, text, text_theme)
 
-    for i, image in enumerate(content['image']):
-        add_image(base, image, get_theme(theme, 'image', i))
+    for image, image_theme in fill_zip(content, theme, 'image'):
+        add_image(base, image, image_theme)
+
+    #for i, subtitle in enumerate(content['subtitle']):
+    #    add_text(base, subtitle, get_theme(theme, 'subtitle', i))
+
+    #for i, text in enumerate(content['text']):
+    #    add_text(base, text, get_theme(theme, 'text', i))
+
+    #for i, image in enumerate(content['image']):
+    #    add_image(base, image, get_theme(theme, 'image', i))
 
     if 'pagenum' in theme:
         theme['pagenum']['value'] = str(pageidx + 1)
