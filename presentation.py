@@ -263,6 +263,9 @@ def main(filename, output):
     f.close()
     slides = presentation_dict['slides']
     layouts = []
+    if 'import' not in presentation_dict:
+        presentation_dict['import'] = []
+
     for layout_file in presentation_dict['import']:
         layout_f = open(layout_file, 'r')
         layout_dict = yaml.load(layout_f,  Loader=yaml.BaseLoader)
