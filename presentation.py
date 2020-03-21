@@ -134,7 +134,7 @@ def add_text(base, content, theme):
     else:
         raise ValueError(f'Invalid halign value: {config["halign"]}')
 
-def push_filled_backword(theme):
+def ignore_filled(content, theme):
     for k in theme:
         if isinstance(theme[k], str) or isinstance(theme[k], dict):
             continue
@@ -144,7 +144,9 @@ def push_filled_backword(theme):
                 filled_in.append(box)
             else:
                 not_filled_in.append(box)
-        theme[k] = not_filled_in + filled_in
+        theme[k] = filled_in + not_filled_in
+        if k in content:
+            content[k] = ([{}] * len(filled_in)) + content[k]
 
 def add_empty_config(content, theme, key):
     if key not in content:
@@ -203,7 +205,7 @@ def fill_vstack_content(stack_contents, stack_frame, content, theme):
                 theme[key].append(frame)
 
 def apply_design(base, content, theme, pageidx):
-    push_filled_backword(theme)
+    ignore_filled(content, theme)
     for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
         add_empty_config(content, theme, key)
 
