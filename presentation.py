@@ -97,7 +97,6 @@ def frame_to_position(frame):
     return left, top, width, height
 
 def add_text(base, content, theme):
-    #breakpoint()
     default_config = {
         'value' : '',
         'font' : 'Arial',
@@ -175,7 +174,7 @@ def nth_block(segment, margin, n, num_blocks):
     return [new_seg_begin, new_seg_begin + block_len]
 
 def fill_hstack_content(stack_contents, stack_frame, content, theme):
-    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
+    for key in ['title', 'subtitle', 'text', 'image', 'shape', 'pagenum', 'vstack', 'hstack']:
         if key not in stack_contents:
             continue
         blocks = len(stack_contents[key])
@@ -193,7 +192,7 @@ def fill_hstack_content(stack_contents, stack_frame, content, theme):
                 theme[key].append(frame)
 
 def fill_vstack_content(stack_contents, stack_frame, content, theme):
-    for key in ['title', 'subtitle', 'text', 'image', 'vstack', 'hstack']:
+    for key in ['title', 'subtitle', 'text', 'image', 'shape', 'pagenum', 'vstack', 'hstack']:
         if key not in stack_contents:
             continue
         blocks = len(stack_contents[key])
