@@ -1,0 +1,149 @@
+masters:
+  - id: content
+    title:
+      - frame:
+          x: [5, 95]
+          y: [5, 15]
+        fontsize: 40
+        fontcolor: "#E65100"
+    shape:
+      - frame:
+          x: [5, 95]
+          y: [15.5, 15.7]
+        type: rectangle
+        color: "#FF9100"
+        fixed: true
+      - frame:
+          x: [89.85, 89.9]
+          y: [92, 100]
+        type: rectangle
+        color: "#FF9100"
+        fixed: true
+    image:
+      - frame:
+          x: [74, 89]
+          y: [92, 100]
+        aspect: 'fit'
+        file: 'sample_images/codable_logo_white.png'
+        fixed: true
+    pagenum:
+      - frame:
+          x: [91, 99]
+          y: [92, 100]
+        fontsize: 16
+        fontcolor: "#FF9100"
+        valign: middle
+        halign: left
+        fixed: true
+layouts:
+  - id: title
+    title:
+      - frame:
+          x: [5, 95]
+          y: [18, 48]
+        fontsize: 60
+        fontcolor: "#E65100"
+        valign: bottom
+        halign: center
+    subtitle:
+      - frame:
+          x: [5, 95]
+          y: [52, 82]
+        fontsize: 40
+        valign: top
+        halign: center
+    shape:
+      - frame:
+          x: [5, 95]
+          y: [49.9, 50.1]
+        type: rectangle
+        color: "#FF9100"
+  - id: side_image
+    master: content
+    vstack:
+      - frame:
+          x: [5, 45]
+          y: [20, 90]
+        margin: 6
+        type: image
+        template:
+          aspect: fit
+      - frame:
+          x: [50, 95]
+          y: [20, 90]
+        margin: 6
+        type: text
+        template: {}
+  - id: image_grid
+    master: content
+    subtitle:
+      - frame:
+          x: [5, 45]
+          y: [20, 27]
+        fontcolor: "#E65100"
+      - frame:
+          x: [50, 90]
+          y: [20, 27]
+        fontcolor: "#E65100"
+    vstack:
+      - frame:
+          x: [5, 95]
+          y: [20, 90]
+        margin: 0
+        type: hstack
+        template:
+          margin: 0
+          type: image
+          template:
+            aspect: fit
+  - id: code
+    master: content
+    subtitle:
+      - frame:
+          x: [5, 95]
+          y: [20, 24]
+        valign: middle
+    text:
+      - frame:
+          x: [5, 95]
+          y: [25, 90]
+        font: Courier
+        fontsize: 15
+    shape:
+      - frame:
+          x: [5, 95]
+          y: [25, 90]
+        type: rectangle
+        color: "#EEEEEE"
+        fixed: true
+  - id: list
+    master: content
+    subtitle:
+      - frame:
+          x: [5, 95]
+          y: [20, 24]
+        valign: middle
+        fontsize: 30
+        fontcolor: "#E65100"
+      - frame:
+          x: [5, 95]
+          y: [44, 48]
+        valign: middle
+        fontsize: 30
+        fontcolor: "#E65100"
+      - frame:
+          x: [5, 95]
+          y: [68, 72]
+        valign: middle
+        fontsize: 30
+        fontcolor: "#E65100"
+    text:
+      - frame:
+          x: [5, 95]
+          y: [25, 42]
+      - frame:
+          x: [5, 95]
+          y: [49, 66]
+      - frame:
+          x: [5, 95]
+          y: [73, 90]

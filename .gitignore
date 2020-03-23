@@ -8,3 +8,6 @@
 *.md5
 *.pdf
 node_modules
+!sample_images/*.png
+!sample.yaml
+!sample_layouts.yaml

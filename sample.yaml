@@ -1,0 +1,70 @@
+import:
+  - sample_layouts.yaml
+slides:
+  - theme: title
+    title:
+      - CodablePPTX Sample Slides
+  - theme: list
+    title:
+      - Important points
+    subtitle:
+      - Point 1
+      - Point 2
+      - Point 3
+    text:
+      - Important
+      - Very important
+      - Very very important
+  - theme: side_image
+    title:
+      - Images & Captions
+    vstack:
+      - image:
+        - sample_images/boy.png
+        - sample_images/girl.png
+      - text:
+        - A boy
+        - A girl
+  - theme: side_image
+    title:
+      - Images & Captions
+    vstack:
+      - image:
+        - sample_images/boy.png
+        - sample_images/girl.png
+        - sample_images/boy.png
+      - text:
+        - A boy
+        - A girl
+        - A boy
+  - theme: image_grid
+    title:
+      - Grid of Images
+    vstack:
+      - hstack:
+          - image: 
+              - sample_images/boy.png
+              - sample_images/girl.png
+              - sample_images/boy.png
+          - image: 
+              - sample_images/girl.png
+              - sample_images/boy.png
+              - sample_images/girl.png
+          - image: 
+              - sample_images/boy.png
+              - sample_images/girl.png
+              - sample_images/boy.png
+  - theme: code
+    title:
+      - Embed source code
+    subtitle:
+      - random.py
+    text:
+      - value: |-
+          def get_random_number():
+            return 4 # chosen by a fair die roll
+
+          def random_animal():
+            animals = ['dog', 'cat', 'pig', 'bear', 'monkey', 'tiger']
+            return animals[get_random_number()]
+        fontsize: 20
