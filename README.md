@@ -53,5 +53,6 @@ npm install
 ```
 
 ## How it works
+[![Image from Gyazo](https://i.gyazo.com/59a270324d9f58d0adc17d7826447fef.gif)](https://gyazo.com/59a270324d9f58d0adc17d7826447fef)
 This program generates a PPTX file from the input YAML file and converts it into into a PDF file. You can see the preview of the PDF by accessing localhost:3000.  
 This program also watches changes of the input YAML file. If it is changed, the program automatically recompiles the YAML and updates the preview.
