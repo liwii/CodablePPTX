@@ -40,6 +40,7 @@ A server program which shows realtime preview of CodablePPTX slides.
   - express 4.17.1
 - [fswatch](https://github.com/emcrisostomo/fswatch)
 - [libreoffice](https://www.libreoffice.org/get-help/install-howto/)
+- md5sum
 
 ## Install NPM Packages
 ```sh
