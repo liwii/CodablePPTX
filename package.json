@@ -21,6 +21,6 @@
     "pdfjs-dist": "^2.2.228"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.3"
   }
 }
