@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/liwii/CodablePPTX#readme",
   "devDependencies": {
-    "pdfjs-dist": "^2.2.228"
+    "pdfjs-dist": "^2.16.105"
   },
   "dependencies": {
     "express": "^4.17.1"
